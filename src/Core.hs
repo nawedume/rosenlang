@@ -1,8 +1,6 @@
-module Expr where
+module Core where
 
 import Dist
-
-type Mapping = [(Expr, Double)] -- Symbol to Probability
 
 data Expr = Symbol String
     | Boolean Bool
@@ -11,7 +9,5 @@ data Expr = Symbol String
     | Reference Expr Expr -- Symbol to any Expr
     | DistInit Expr -- Symbol and Mapping
     | DistJoin [Expr] -- 
-    | Map Mapping
-    deriving (Show)
-
-
+    | Measure [(Expr, Expr)] -- A mapping from a symbol to a number (probability)
+    deriving (Show, Eq)

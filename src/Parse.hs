@@ -1,7 +1,7 @@
 module Parse where
 
 import Dist
-import Expr
+import Core
 
 data Parser t = Parser (String -> [(t, String)])
 run (Parser p) = p
@@ -124,7 +124,7 @@ exprParse :: Parser Expr
 exprParse = numberParse <|>
             symbolParse <|>
             booleanParse <|>
-            mapParse <|>
+            measureParse <|>
             distInitParse <|>
             distJoinParse <|>
             tupleParse <|>
@@ -146,16 +146,16 @@ booleanParse = do
     bstr <- (stringParser "TRUE") <|> (stringParser "FALSE")
     return $ Boolean $ bstr == "TRUE"
 
-mapParse :: Parser Expr
-mapParse = do
-    l <- listParse parseMapping
-    return $ Map l
+measureParse :: Parser Expr
+measureParse = do
+    l <- listParse parseMeasure
+    return $ Measure l
     where
-        parseMapping :: Parser (Expr, Probability)
-        parseMapping = do
+        parseMeasure :: Parser (Expr, Expr)
+        parseMeasure = do
             s <- symbolParse <|> numberParse <|> booleanParse
             operS "->"
-            d <- probability
+            d <- numberParse
             return (s, d)
 
 tupleParse :: Parser Expr
@@ -191,8 +191,8 @@ refParse = do
 distInitParse :: Parser Expr
 distInitParse = do
     operS "DIST"
-    mapping <- mapParse
-    return $ DistInit mapping
+    measure <- measureParse
+    return $ DistInit measure
 
 distJoinParse :: Parser Expr
 distJoinParse = do

@@ -21,6 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- unordered-containers >= 0.2
 
 library:
   source-dirs: src
@@ -46,3 +47,8 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - rosen
+    - QuickCheck >= 2.9.0
+    - HUnit >= 1.5
+    - test-framework
+    - test-framework-quickcheck2
+
