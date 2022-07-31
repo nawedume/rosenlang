@@ -90,3 +90,10 @@ lights = do
     return (l1, l2)
 
 
+-- Die
+dice = Distribution { dist = map (\x -> (x, 1 / 6)) [1..6] }
+
+onlyEvens = do
+    d <- dice
+    if d `mod` 2 == 0 then return $ Just d
+    else return Nothing

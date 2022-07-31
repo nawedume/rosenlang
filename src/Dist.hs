@@ -6,7 +6,8 @@ module Dist where
 
 import Data.List
 
-data Distribution a = Distribution { dist :: [(a, Double)] }
+type Probability = Double
+data Distribution a = Distribution { dist :: [(a, Probability)] }
 
 instance Functor Distribution where
     fmap func (Distribution dist) =  Distribution { dist = map (\(a, p) -> (func a, p)) dist }
@@ -38,6 +39,11 @@ clean (Distribution impDist) = Distribution {
             foldProbs xx@((a, _):_) = (a, sum $ map (\(a, p) -> p) xx)
         in map foldProbs tempDist
     }
+
+cleanPred :: (Ord a, Eq a) => Distribution (Maybe a) -> Distribution a
+cleanPred (Distribution impDist) = clean (Distribution { dist = (impDist >>= isJust) }) where
+    isJust (Just a, p) = [(a, p)]
+    isJust _ = []
 
 instance (Show a) => Show (Distribution a) where
     show (Distribution dist) =

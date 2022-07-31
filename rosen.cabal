@@ -27,7 +27,9 @@ library
   exposed-modules:
       Dist
       Example
+      Expr
       Lib
+      Parse
   other-modules:
       Paths_rosen
   hs-source-dirs:
