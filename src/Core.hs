@@ -4,6 +4,7 @@ import Control.Monad.Except
 import Control.Monad.State
 import Dist
 import Data.HashMap.Strict as H 
+import Data.List as L
 
 data Expr = Symbol String
     | Boolean Bool
@@ -25,7 +26,6 @@ data Val =
     | StrVal [Char]
     | MeasureVal [(Val, Probability)] -- creates a closure used for a distribution
     | NoneVal
-    deriving (Show)
 
 type Env = HashMap String Val
 
@@ -40,6 +40,17 @@ data RosenError
     | UnknownError String       -- This should never occur 
     deriving (Show)
 
+listToString :: (Show a) => [a] -> [Char]
+listToString l = "(" ++ (intercalate "," (L.map show l)) ++ ")"
+
+instance Show Val where
+    show (DistVal dist) = show dist
+    show (TupleVal vals) = listToString vals
+    show (NumVal d) = show d
+    show (BoolVal b) = if b then "TRUE" else "FALSE"
+    show (StrVal s) = show s
+    show (MeasureVal arr) = listToString arr
+    show (NoneVal) = ""
 
 runProgram pro env = runState (runExceptT pro) env
 

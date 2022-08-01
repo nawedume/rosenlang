@@ -13,7 +13,6 @@ main = repl H.empty
 
 step :: Env -> IO (Maybe Env)
 step env = do
-    putStrLn "Enter an expression:"
     putStr ">>> "
     line <- getLine
     case line of
@@ -33,7 +32,7 @@ step env = do
                             putStrLn ("  " ++ show err)
                             return env
                         (Right val, env) -> do
-                            putStrLn ("   " ++ show val)
+                            putStrLn (show val)
                             return env
 
 repl :: Env -> IO ()

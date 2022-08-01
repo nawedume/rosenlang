@@ -37,7 +37,6 @@ eval (DistInit m) = do
         getMeasure (MeasureVal map) = return map
         getMeasure mv = throwError $ (VarNotAMeasure m mv)
 
-
 eval (Reference (Symbol s) e) = do
     val <- eval e
     env <- get
