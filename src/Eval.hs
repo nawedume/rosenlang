@@ -44,10 +44,20 @@ eval (Reference (Symbol s) e) = do
     let nenv = H.insert s val env
     put nenv
     return NoneVal
+
+eval (DistJoin distExprs) = do
+    distributions <- mapExpr evalDists distExprs
+    let finalDist = (\valArr -> TupleVal valArr) <$> joinDistributions distributions
+    return $ DistVal finalDist
+    where
+        evalDists distExpr = do
+            dv <- eval distExpr
+            case dv of
+                (DistVal dist)  -> return dist
+                otherwise       -> throwError $ UnknownError "a non-distribution value was derived from a dist expr"
+
 eval _ = do
-    throwError $ InvalidExpression "Must be in the form $varName = $expression"
-
-
+    throwError $ InvalidExpression "Expression not defined"
 
 mapExpr :: (a -> Program b) -> [a] -> Program [b]
 mapExpr _ [] = return []

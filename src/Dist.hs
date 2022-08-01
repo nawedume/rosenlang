@@ -55,5 +55,13 @@ instance (Show a) => Show (Distribution a) where
             getListStr distList = map (\(a, p) -> (show a) ++ ": " ++ (show p)) distList
             getOtherP first = 1.0 - (sum $ map (\(_, p) -> p) first)
     
-
+joinDistributions :: [Distribution a] -> Distribution [a]
+joinDistributions [] = error "Can't join 0 distributions"
+joinDistributions [d] = do
+    m <- d
+    return [m]
+joinDistributions (d:ds) = do
+    measure <- d 
+    otherM <- joinDistributions ds
+    return $ measure:otherM
 
