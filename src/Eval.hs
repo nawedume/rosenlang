@@ -16,6 +16,7 @@ eval (Symbol s) = do
 
 eval (Number d) = return $ NumVal d
 eval (Boolean b) = return $ BoolVal b
+eval (Str s) = return $ StrVal s
 
 eval (Tuple exprs) = do
     vals <- mapExpr eval exprs
@@ -25,9 +26,11 @@ eval (Measure mapping) = do
     mapVals <- mapExpr evalMapping mapping
     return $ MeasureVal mapVals where
         evalMapping :: (Expr, Expr) -> Program (Val, Probability)
-        evalMapping (Symbol s, Number d) = do
+        evalMapping (key, Number d) = do
             if d < 0.0 || d > 1.0 then throwError $ MeasureNotInBounds d
-            else return $ (StrVal s, d)
+            else do
+                v <- eval key
+                return $ (v, d)
 
 eval (DistInit m) = do
     mval <- eval m

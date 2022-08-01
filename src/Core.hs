@@ -9,6 +9,7 @@ import Data.List as L
 data Expr = Symbol String
     | Boolean Bool
     | Number Double
+    | Str String 
     | Tuple [Expr]  -- An order list of symbols, or literals
     | Measure [(Expr, Expr)] -- A mapping from a symbol to a number (probability)
     | DistInit Expr -- Symbol and Mapping, mapping can be a Measure or a Symbol (variable)

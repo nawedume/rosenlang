@@ -146,12 +146,19 @@ exprSetParse = foldr1 (\x y -> x <|> y) grammerGens where
             distJoinParse,
             tupleParse,
             refParse,
+            strParse,
             symbolParse]
 
 numberParse :: Parser Expr
 numberParse = do
     d <- double
     return $ Number d
+
+strParse :: Parser Expr
+strParse = do
+    charParser '\''
+    s <- many alphanumeric
+    return $ Str s
 
 symbolParse :: Parser Expr
 symbolParse = do
@@ -171,7 +178,7 @@ measureParse = do
     where
         parseMeasure :: Parser (Expr, Expr)
         parseMeasure = do
-            s <- symbolParse <|> numberParse <|> booleanParse
+            s <- exprSetParse
             operS "->"
             d <- numberParse
             return (s, d)

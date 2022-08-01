@@ -42,7 +42,11 @@ tests = [testGroup "=G= parse" [
     testProperty "=P= DistJoinParse inner distributions" parseDistJoinTest2,
 
     testProperty "=P= ReferenceParse recursiveReference" parseReferenceTest1,
-    testProperty "=P= ReferenceParse simple number assignment" parseReferenceTest2
+    testProperty "=P= ReferenceParse simple number assignment" parseReferenceTest2,
+
+    testProperty "=P= StrParse alpha string" parseStrTest1,
+    testProperty "=P= StrParse number string" parseStrTest2,
+    testProperty "=P= StrParse invalid string" parseStrTest3
     ]]
 
 parseSymbolTest1 = run exprParse "A;" == [(Symbol "A", "")]
@@ -84,3 +88,7 @@ parseDistJoinTest2 = run exprParse "DIST (A, DIST (A -> 1.0), DIST (A, B));" == 
 
 parseReferenceTest1 = run exprParse "A = DIST (A);" == [(Reference (Symbol "A") (DistJoin [Symbol "A"]), "")]
 parseReferenceTest2 = run exprParse "A =1.0;" == [(Reference (Symbol "A") (Number 1.0), "")]
+
+parseStrTest1 = run exprParse "'abc;" == [(Str "abc", "")]
+parseStrTest2 = run exprParse "'1abc;" == [(Str "1abc", "")]
+parseStrTest3 = run exprParse "''1abc;" == []
