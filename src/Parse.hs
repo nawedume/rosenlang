@@ -123,8 +123,15 @@ operS c = do
     return c
 
 {- Parsing Expressions of Rosen -}
+parseSeqExpr :: String -> [Expr]
+parseSeqExpr line = case (run exprParse line) of
+        [] -> []
+        ((x, rs):_) ->  let rest = parseSeqExpr rs
+                        in x:rest
+
 exprParse :: Parser Expr
 exprParse = do
+    spaces
     parse <- exprSetParse
     terminator
     return $ parse
@@ -202,7 +209,7 @@ refParse = do
 distInitParse :: Parser Expr
 distInitParse = do
     operS "DIST"
-    measure <- measureParse
+    measure <- measureParse <|> symbolParse
     return $ DistInit measure
 
 distJoinParse :: Parser Expr
