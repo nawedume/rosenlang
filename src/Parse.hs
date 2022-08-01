@@ -66,6 +66,9 @@ spaces = many (oneOf " \t")
 spaces1 :: Parser [Char]
 spaces1 = many1 (oneOf " \t")
 
+terminator :: Parser [Char]
+terminator = many1 (charParser ';')
+
 inbetween :: Char -> Char -> Parser Char
 inbetween a b = sat (\x -> x >= a && x <= b)
 
@@ -121,14 +124,22 @@ operS c = do
 
 {- Parsing Expressions of Rosen -}
 exprParse :: Parser Expr
-exprParse = numberParse <|>
-            symbolParse <|>
-            booleanParse <|>
-            measureParse <|>
-            distInitParse <|>
-            distJoinParse <|>
-            tupleParse <|>
-            refParse
+exprParse = do
+    parse <- exprSetParse
+    terminator
+    return $ parse
+
+
+exprSetParse = foldr1 (\x y -> x <|> y) grammerGens where
+        grammerGens = [
+            numberParse,
+            booleanParse,
+            measureParse,
+            distInitParse,
+            distJoinParse,
+            tupleParse,
+            refParse,
+            symbolParse]
 
 numberParse :: Parser Expr
 numberParse = do
@@ -160,7 +171,7 @@ measureParse = do
 
 tupleParse :: Parser Expr
 tupleParse = do
-    l <- listParse exprParse
+    l <- listParse exprSetParse
     return $ Tuple l
 
 
@@ -185,7 +196,7 @@ refParse :: Parser Expr
 refParse = do
     sym <- symbolParse
     operC '='
-    e <- exprParse
+    e <- exprSetParse
     return $ Reference sym e
 
 distInitParse :: Parser Expr
