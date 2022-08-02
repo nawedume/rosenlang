@@ -149,8 +149,7 @@ exprSetParse = foldr1 (\x y -> x <|> y) grammerGens where
             intParse,
             booleanParse,
             measureParse,
-            distInitParse,
-            distJoinParse,
+            distOpParse,
             tupleParse,
             refParse,
             strParse,
@@ -225,14 +224,17 @@ refParse = do
     e <- exprSetParse
     return $ Reference sym e
 
-distInitParse :: Parser Expr
-distInitParse = do
-    operS "DIST"
-    measure <- measureParse <|> symbolParse
-    return $ DistInit measure
 
-distJoinParse :: Parser Expr
-distJoinParse = do
-    operS "DIST"
-    dists <- listParse (distInitParse <|> distJoinParse <|> symbolParse)
-    return $ DistJoin dists 
+distOpParse :: Parser Expr
+distOpParse = do
+    op <- distOperatorParser
+    distExprs <- listParse $ measureParse <|> symbolParse <|> distOpParse
+    case lookup op distOps of
+        Just opCons -> return $ opCons distExprs
+        Nothing -> error "Operator should always be defined here, due to parse"
+    where
+        validParsers = (measureParse <|> symbolParse)
+
+distOps = [("*", JoinOp), 
+           ("+", CatOp)]
+distOperatorParser = foldr1 (<|>) (map (operS . fst) distOps) 

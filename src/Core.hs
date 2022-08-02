@@ -13,8 +13,8 @@ data Expr = Symbol String
     | Str String 
     | Tuple [Expr]  -- An order list of symbols, or literals
     | Measure [(Expr, Expr)] -- A mapping from a symbol to a number (probability)
-    | DistInit Expr -- Symbol and Mapping, mapping can be a Measure or a Symbol (variable)
-    | DistJoin [Expr] -- 
+    | JoinOp [Expr] -- Cartesian product of the distributions in the list
+    | CatOp [Expr] -- Combination of distributions in the list
     | Reference Expr Expr -- Symbol to any Expr
     deriving (Show, Eq)
 
@@ -27,7 +27,6 @@ data Val =
     | IntVal Integer
     | BoolVal Bool
     | StrVal [Char]
-    | MeasureVal [(Val, Probability)] -- creates a closure used for a distribution
     | NoneVal
 
 type Env = HashMap String Val
@@ -53,7 +52,6 @@ instance Show Val where
     show (IntVal i) = show i
     show (BoolVal b) = if b then "TRUE" else "FALSE"
     show (StrVal s) = show s
-    show (MeasureVal arr) = listToString arr
     show (NoneVal) = ""
 
 runProgram pro env = runState (runExceptT pro) env

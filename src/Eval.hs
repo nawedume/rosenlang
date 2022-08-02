@@ -25,21 +25,13 @@ eval (Tuple exprs) = do
 
 eval (Measure mapping) = do
     mapVals <- mapExpr evalMapping mapping
-    return $ MeasureVal mapVals where
+    return $ DistVal (Distribution { dist = mapVals }) where
         evalMapping :: (Expr, Expr) -> Program (Val, Probability)
         evalMapping (key, Real d) = do
             if d < 0.0 || d > 1.0 then throwError $ MeasureNotInBounds d
             else do
                 v <- eval key
                 return $ (v, d)
-
-eval (DistInit m) = do
-    mval <- eval m
-    measureList <- getMeasure mval
-    return $ DistVal (Distribution { dist = measureList }) where
-        getMeasure :: Val -> Program [(Val, Probability)]
-        getMeasure (MeasureVal map) = return map
-        getMeasure mv = throwError $ (VarNotAMeasure m mv)
 
 eval (Reference (Symbol s) e) = do
     val <- eval e
@@ -48,19 +40,23 @@ eval (Reference (Symbol s) e) = do
     put nenv
     return NoneVal
 
-eval (DistJoin distExprs) = do
-    distributions <- mapExpr evalDists distExprs
-    let finalDist = (\valArr -> TupleVal valArr) <$> joinDistributions distributions
+eval (JoinOp distExprs) = do
+    dists <- mapExpr evalDist distExprs
+    let finalDist = (\valArr -> TupleVal valArr) <$> join dists
     return $ DistVal finalDist
-    where
-        evalDists distExpr = do
-            dv <- eval distExpr
-            case dv of
-                (DistVal dist)  -> return dist
-                otherwise       -> throwError $ UnknownError "a non-distribution value was derived from a dist expr"
+
+eval (CatOp distExprs) = do
+    dists <- mapExpr evalDist distExprs
+    return $ DistVal $ cat dists
 
 eval _ = do
     throwError $ InvalidExpression "Expression not defined"
+
+evalDist distExpr = do
+    dv <- eval distExpr
+    case dv of
+        (DistVal dist)  -> return dist
+        otherwise       -> throwError $ UnknownError "a non-distribution value was derived from a dist expr"
 
 mapExpr :: (a -> Program b) -> [a] -> Program [b]
 mapExpr _ [] = return []

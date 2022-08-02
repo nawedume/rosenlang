@@ -97,3 +97,15 @@ onlyEvens = do
     d <- dice
     if d `mod` 2 == 0 then return $ Just d
     else return Nothing
+
+
+
+-- geometric
+data Case = H | T | S [Case] deriving (Show, Eq)
+
+coin = Distribution { dist  = [(H, 0.5), (T, 0.5)] }
+onlyHead = coin `given` (== H)
+onlyTail = coin `given` (== T)
+
+geo :: Distribution Case
+geo = cat [onlyHead, S <$> (join [onlyTail, geo])]

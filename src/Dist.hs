@@ -55,21 +55,20 @@ instance (Show a) => Show (Distribution a) where
             getListStr distList = map (\(a, p) -> (show a) ++ ": " ++ (show p)) distList
             getOtherP first = 1.0 - (sum $ map (\(_, p) -> p) first)
     
-joinDistributions :: [Distribution a] -> Distribution [a]
-joinDistributions [] = error "Can't join 0 distributions"
-joinDistributions [d] = do
+join :: [Distribution a] -> Distribution [a]
+join [] = error "Can't join 0 distributions"
+join [d] = do
     m <- d
     return [m]
-joinDistributions (d:ds) = do
+join (d:ds) = do
     measure <- d 
-    otherM <- joinDistributions ds
+    otherM <- join ds
     return $ measure:otherM
 
 given :: Distribution a -> (a -> Bool) -> Distribution a
 given (Distribution d) pred = 
     let d2 = filter (pred . fst) d
-        total = sum (map snd d2)
-        d3 = map (\(a, p) -> (a, p / total)) d2
+        d3 = normalizeDistribution d2
     in  Distribution { dist = d3 }
 
 until :: Distribution a -> (a -> Bool) -> Distribution [a]
@@ -80,4 +79,12 @@ until distribution pred = do
         l <- Dist.until distribution pred
         return $ c:l
 
-        
+cat :: [Distribution a] -> Distribution a
+cat dists = 
+    let measures = map dist dists
+        newMeasure = concat measures
+    in  Distribution { dist = newMeasure }
+
+normalizeDistribution dist = 
+        let total = sum (map snd dist)
+        in map (\(a, p) -> (a, p / total)) dist
