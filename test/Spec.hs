@@ -15,12 +15,12 @@ tests = [testGroup "=G= parse" [
     testProperty "=P= SymbolParse simple spit parse" parseSymbolTest4,
     testProperty "=P= SymbolParse invalid symbol " parseSymbolTest5,
     
-    testProperty "=P= NumberParse simple alpha single" parseNumberTest1,
-    testProperty "=P= NumberParse simple alpha multi"  parseNumberTest2,
-    testProperty "=P= NumberParse simple alphanumeric" parseNumberTest3,
-    testProperty "=P= NumberParse simple spit parse" parseNumberTest4,
-    testProperty "=P= NumberParse invalid symbol " parseNumberTest6,
-    testProperty "=P= NumberParse invalid symbol " parseNumberTest7,
+    testProperty "=P= RealParse simple alpha single" parseRealTest1,
+    testProperty "=P= RealParse simple alpha multi"  parseRealTest2,
+    testProperty "=P= RealParse simple alphanumeric" parseRealTest3,
+    testProperty "=P= RealParse simple spit parse" parseRealTest4,
+    testProperty "=P= RealParse invalid symbol " parseRealTest6,
+    testProperty "=P= RealParse invalid symbol " parseRealTest7,
 
     testProperty "=P= BooleanParse true test" parseBooleanTest1,
     testProperty "=P= BooleanParse false test" parseBooleanTest2,
@@ -46,7 +46,12 @@ tests = [testGroup "=G= parse" [
 
     testProperty "=P= StrParse alpha string" parseStrTest1,
     testProperty "=P= StrParse number string" parseStrTest2,
-    testProperty "=P= StrParse invalid string" parseStrTest3
+    testProperty "=P= StrParse invalid string" parseStrTest3,
+
+    testProperty "=P= IntParse single int" parseIntTest1,
+    testProperty "=P= IntParse single negative int" parseIntTest2,
+    testProperty "=P= IntParse multi digit" parseIntTest3
+
     ]]
 
 parseSymbolTest1 = run exprParse "A;" == [(Symbol "A", "")]
@@ -55,40 +60,44 @@ parseSymbolTest3 = run exprParse "abc12;" == [(Symbol "abc12", "")]
 parseSymbolTest4 = run exprParse "aBc; a;" == [(Symbol "aBc", " a;")]
 parseSymbolTest5 = run exprParse "1Bc; a;" == []
 
-parseNumberTest1 = run exprParse "1.0;" == [(Number 1.0, "")]
-parseNumberTest2 = run exprParse "123.0;" == [(Number 123.0, "")]
-parseNumberTest3 = run exprParse "0.321;" == [(Number 0.321, "")]
-parseNumberTest4 = run exprParse "0.0;" == [(Number 0.0, "")]
-parseNumberTest5 = run exprParse "321.345;" == [(Number 321.345, "")]
-parseNumberTest6 = run exprParse "4;" == []
-parseNumberTest7 = run exprParse "1.b;" == []
+parseRealTest1 = run exprParse "1.0;" == [(Real 1.0, "")]
+parseRealTest2 = run exprParse "123.0;" == [(Real 123.0, "")]
+parseRealTest3 = run exprParse "0.321;" == [(Real 0.321, "")]
+parseRealTest4 = run exprParse "0.0;" == [(Real 0.0, "")]
+parseRealTest5 = run exprParse "321.345;" == [(Real 321.345, "")]
+parseRealTest6 = run exprParse ".3;" == []
+parseRealTest7 = run exprParse "1.b;" == []
 
 parseBooleanTest1 = run exprParse "TRUE;" == [(Boolean True, "")]
 parseBooleanTest2 = run exprParse "FALSE;" == [(Boolean False, "")]
 
-parseTupleTest1 = run exprParse "(1.0, TRUE, (A -> 1.0), (ab, cd));" == [(Tuple [(Number 1.0), (Boolean True), (Measure [(Symbol "A", Number 1.0)]), Tuple [Symbol "ab", Symbol "cd"]], "")]
+parseTupleTest1 = run exprParse "(1.0, TRUE, (A -> 1.0), (ab, cd));" == [(Tuple [(Real 1.0), (Boolean True), (Measure [(Symbol "A", Real 1.0)]), Tuple [Symbol "ab", Symbol "cd"]], "")]
 parseTupleTest2 = run exprParse "();" == []
 parseTupleTest3 = run exprParse "(FALSE);" == [(Tuple [Boolean False], "")]
 
-parseMeasureTest1 = run exprParse "(A -> 1.0);" == [ (Measure [(Symbol "A", Number 1.0)], "") ]
-parseMeasureTest2 = run exprParse "(A -> 0.4, B -> 0.6);" == [(Measure [(Symbol "A", Number 0.4), (Symbol "B", Number 0.6)], "")]
+parseMeasureTest1 = run exprParse "(A -> 1.0);" == [ (Measure [(Symbol "A", Real 1.0)], "") ]
+parseMeasureTest2 = run exprParse "(A -> 0.4, B -> 0.6);" == [(Measure [(Symbol "A", Real 0.4), (Symbol "B", Real 0.6)], "")]
 parseMeasureTest3 = run exprParse "(A -> );" == []
 parseMeasureTest4 = run exprParse "(A -> 1.0;" == []
 
-parseDistInitTest1 = run exprParse "DIST (A->0.5,B->0.5);" == [(DistInit (Measure [(Symbol "A", Number 0.5), (Symbol "B", Number 0.5)]) ,"")]
-parseDistInitTest2 = run exprParse "DIST (A->1.0);" == [(DistInit (Measure [(Symbol "A", Number 1.0)]) ,"")]
+parseDistInitTest1 = run exprParse "DIST (A->0.5,B->0.5);" == [(DistInit (Measure [(Symbol "A", Real 0.5), (Symbol "B", Real 0.5)]) ,"")]
+parseDistInitTest2 = run exprParse "DIST (A->1.0);" == [(DistInit (Measure [(Symbol "A", Real 1.0)]) ,"")]
 parseDistInitTest3 = run exprParse "DIST ();" == []
 
 parseDistJoinTest1 = run exprParse "DIST (A, B, C);" == [(DistJoin [Symbol "A", Symbol "B", Symbol "C"], "")]
 parseDistJoinTest2 = run exprParse "DIST (A, DIST (A -> 1.0), DIST (A, B));" == [(DistJoin 
         [Symbol "A",
-         DistInit (Measure [(Symbol "A", Number 1.0)]),
+         DistInit (Measure [(Symbol "A", Real 1.0)]),
          DistJoin [Symbol "A", Symbol "B"]
         ], "")]
 
 parseReferenceTest1 = run exprParse "A = DIST (A);" == [(Reference (Symbol "A") (DistJoin [Symbol "A"]), "")]
-parseReferenceTest2 = run exprParse "A =1.0;" == [(Reference (Symbol "A") (Number 1.0), "")]
+parseReferenceTest2 = run exprParse "A =1.0;" == [(Reference (Symbol "A") (Real 1.0), "")]
 
 parseStrTest1 = run exprParse "'abc;" == [(Str "abc", "")]
 parseStrTest2 = run exprParse "'1abc;" == [(Str "1abc", "")]
 parseStrTest3 = run exprParse "''1abc;" == []
+
+parseIntTest1 = run exprParse "1;" == [(Int 1, "")]
+parseIntTest2 = run exprParse "-1;" == [(Int (-1), "")]
+parseIntTest3 = run exprParse "0521;" == [(Int 521, "")]

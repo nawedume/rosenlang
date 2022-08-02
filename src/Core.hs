@@ -8,7 +8,8 @@ import Data.List as L
 
 data Expr = Symbol String
     | Boolean Bool
-    | Number Double
+    | Real Double
+    | Int Integer
     | Str String 
     | Tuple [Expr]  -- An order list of symbols, or literals
     | Measure [(Expr, Expr)] -- A mapping from a symbol to a number (probability)
@@ -22,7 +23,8 @@ type Dist = Distribution Val
 data Val = 
       DistVal Dist -- A concrete value of a distribution
     | TupleVal [Val]
-    | NumVal Double
+    | RealVal Double
+    | IntVal Integer
     | BoolVal Bool
     | StrVal [Char]
     | MeasureVal [(Val, Probability)] -- creates a closure used for a distribution
@@ -47,7 +49,8 @@ listToString l = "(" ++ (intercalate "," (L.map show l)) ++ ")"
 instance Show Val where
     show (DistVal dist) = show dist
     show (TupleVal vals) = listToString vals
-    show (NumVal d) = show d
+    show (RealVal d) = show d
+    show (IntVal i) = show i
     show (BoolVal b) = if b then "TRUE" else "FALSE"
     show (StrVal s) = show s
     show (MeasureVal arr) = listToString arr

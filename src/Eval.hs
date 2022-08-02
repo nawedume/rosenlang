@@ -14,7 +14,8 @@ eval (Symbol s) = do
         Nothing -> throwError $ VariableNotDefined s
 
 
-eval (Number d) = return $ NumVal d
+eval (Real d) = return $ RealVal d
+eval (Int i) = return $ IntVal i
 eval (Boolean b) = return $ BoolVal b
 eval (Str s) = return $ StrVal s
 
@@ -26,7 +27,7 @@ eval (Measure mapping) = do
     mapVals <- mapExpr evalMapping mapping
     return $ MeasureVal mapVals where
         evalMapping :: (Expr, Expr) -> Program (Val, Probability)
-        evalMapping (key, Number d) = do
+        evalMapping (key, Real d) = do
             if d < 0.0 || d > 1.0 then throwError $ MeasureNotInBounds d
             else do
                 v <- eval key
