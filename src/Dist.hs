@@ -65,3 +65,19 @@ joinDistributions (d:ds) = do
     otherM <- joinDistributions ds
     return $ measure:otherM
 
+given :: Distribution a -> (a -> Bool) -> Distribution a
+given (Distribution d) pred = 
+    let d2 = filter (pred . fst) d
+        total = sum (map snd d2)
+        d3 = map (\(a, p) -> (a, p / total)) d2
+    in  Distribution { dist = d3 }
+
+until :: Distribution a -> (a -> Bool) -> Distribution [a]
+until distribution pred = do
+    c <- distribution
+    if pred c then return $ [c]
+    else do
+        l <- Dist.until distribution pred
+        return $ c:l
+
+        
