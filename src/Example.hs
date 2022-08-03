@@ -101,7 +101,7 @@ onlyEvens = do
 
 
 -- geometric
-data Case = H | T | S [Case] deriving (Show, Eq)
+data Case = H | T | S [Case] deriving (Show, Eq, Ord)
 
 coin = Distribution { dist  = [(H, 0.5), (T, 0.5)] }
 onlyHead = coin `given` (== H)

@@ -7,7 +7,7 @@ module Dist where
 import Data.List
 
 type Probability = Double
-data Distribution a = Distribution { dist :: [(a, Probability)] }
+data Distribution a = Distribution { dist :: [(a, Probability)] } deriving (Eq, Ord)
 
 instance Functor Distribution where
     fmap func (Distribution dist) =  Distribution { dist = map (\(a, p) -> (func a, p)) dist }
@@ -79,11 +79,11 @@ until distribution pred = do
         l <- Dist.until distribution pred
         return $ c:l
 
-cat :: [Distribution a] -> Distribution a
+cat :: (Ord a) => [Distribution a] -> Distribution a
 cat dists = 
     let measures = map dist dists
-        newMeasure = concat measures
-    in  Distribution { dist = newMeasure }
+        newMeasure = normalizeDistribution $ concat measures
+    in  clean $ Distribution { dist = newMeasure }
 
 normalizeDistribution dist = 
         let total = sum (map snd dist)

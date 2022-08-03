@@ -20,6 +20,7 @@ data Expr = Symbol String
 
 
 type Dist = Distribution Val
+
 data Val = 
       DistVal Dist -- A concrete value of a distribution
     | TupleVal [Val]
@@ -28,6 +29,7 @@ data Val =
     | BoolVal Bool
     | StrVal [Char]
     | NoneVal
+    deriving (Eq, Ord)
 
 type Env = HashMap String Val
 
