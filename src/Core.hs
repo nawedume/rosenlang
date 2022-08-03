@@ -15,20 +15,22 @@ data Expr = Symbol String
     | Measure [(Expr, Expr)] -- A mapping from a symbol to a number (probability)
     | JoinOp [Expr] -- Cartesian product of the distributions in the list
     | CatOp [Expr] -- Combination of distributions in the list
+    | ExpectQuery Expr -- Expectation for a distribution
     | Reference Expr Expr -- Symbol to any Expr
+    | RelOpExp String Expr Expr -- The operation, and the two expressions
     deriving (Show, Eq)
 
 
 type Dist = Distribution Val
 
 data Val = 
-      DistVal Dist -- A concrete value of a distribution
-    | TupleVal [Val]
-    | RealVal Double
-    | IntVal Integer
+     NoneVal
     | BoolVal Bool
+    | IntVal Integer
+    | RealVal Double
     | StrVal [Char]
-    | NoneVal
+    | TupleVal [Val]
+    | DistVal Dist -- A concrete value of a distribution
     deriving (Eq, Ord)
 
 type Env = HashMap String Val
@@ -60,3 +62,12 @@ runProgram pro env = runState (runExceptT pro) env
 
 constantDistribution :: a -> Distribution a
 constantDistribution n = Distribution { dist = [(n, 1.0)] }
+
+relationOpMap :: [(String, Val -> Val -> Bool)]
+relationOpMap = [
+    ("==", (==)),
+    ("<=", (<=)),
+    (">=", (>=)),
+    ("<", (<)),
+    (">", (>)),
+    ("!=", (/=))]

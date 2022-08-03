@@ -5,6 +5,7 @@ This module holds the definitions of the descrete distributions used for this la
 module Dist where
 
 import Data.List
+import System.Random
 
 type Probability = Double
 data Distribution a = Distribution { dist :: [(a, Probability)] } deriving (Eq, Ord)
@@ -84,6 +85,9 @@ cat dists =
     let measures = map dist dists
         newMeasure = normalizeDistribution $ concat measures
     in  clean $ Distribution { dist = newMeasure }
+
+expectation :: Distribution Double -> Double
+expectation (Distribution dist) = sum $ map (\(a, p) -> ((a * p) :: Double)) dist
 
 normalizeDistribution dist = 
         let total = sum (map snd dist)

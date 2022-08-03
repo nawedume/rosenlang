@@ -145,12 +145,14 @@ exprParse = do
 
 exprSetParse = foldr1 (\x y -> x <|> y) grammerGens where
         grammerGens = [
+            relOpParse,
             realParse,
             intParse,
             booleanParse,
             measureParse,
             distOpParse,
             tupleParse,
+            expectationParse,
             refParse,
             strParse,
             symbolParse]
@@ -224,7 +226,6 @@ refParse = do
     e <- exprSetParse
     return $ Reference sym e
 
-
 distOpParse :: Parser Expr
 distOpParse = do
     op <- distOperatorParser
@@ -238,3 +239,18 @@ distOpParse = do
 distOps = [("*", JoinOp), 
            ("+", CatOp)]
 distOperatorParser = foldr1 (<|>) (map (operS . fst) distOps) 
+
+relOpParse :: Parser Expr
+relOpParse = do
+    first <- validParsers
+    op <- foldr1 (<|>) (map (operS . fst) relationOpMap)
+    second <- validParsers <|> relOpParse
+    return $ RelOpExp op first second
+    where
+        validParsers = symbolParse <|> strParse <|> intParse <|> realParse
+
+expectationParse :: Parser Expr
+expectationParse = do
+    operS "EXPECT"
+    distExpr <- exprSetParse 
+    return $ ExpectQuery distExpr

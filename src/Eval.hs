@@ -49,6 +49,26 @@ eval (CatOp distExprs) = do
     dists <- mapExpr evalDist distExprs
     return $ DistVal $ cat dists
 
+eval (RelOpExp op e1 e2) = do
+    v1 <- eval e1
+    v2 <- eval e2
+    case Prelude.lookup op relationOpMap of
+        Just boolOp -> return $ BoolVal $ boolOp v1 v2
+        Nothing -> throwError $ InvalidExpression "Operation not defined for evaluation" 
+
+eval (ExpectQuery distExpr) = do
+    dVal <- eval distExpr
+    case dVal of
+        (DistVal distribution) -> do
+            let realValDist = valToReal <$> distribution
+            return $ RealVal $ expectation realValDist
+        otherwise               -> throwError $ InvalidExpression "Expected a distribution."
+    where
+        valToReal (IntVal i) = fromIntegral i
+        valToReal (RealVal d) = d
+        valToReal val = 0.0
+
+
 eval _ = do
     throwError $ InvalidExpression "Expression not defined"
 

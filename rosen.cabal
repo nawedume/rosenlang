@@ -38,6 +38,7 @@ library
   build-depends:
       base >=4.7 && <5
     , mtl >=2.2.2
+    , random >=1.2.1.1
     , unordered-containers >=0.2
   default-language: Haskell2010
 
@@ -51,6 +52,7 @@ executable rosen-exe
   build-depends:
       base >=4.7 && <5
     , mtl >=2.2.2
+    , random >=1.2.1.1
     , rosen
     , unordered-containers >=0.2
   default-language: Haskell2010
@@ -68,6 +70,7 @@ test-suite rosen-test
     , QuickCheck >=2.9.0
     , base >=4.7 && <5
     , mtl >=2.2.2
+    , random >=1.2.1.1
     , rosen
     , test-framework
     , test-framework-quickcheck2

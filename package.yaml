@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - unordered-containers >= 0.2
 - mtl >= 2.2.2
+- random >= 1.2.1.1
 
 library:
   source-dirs: src
