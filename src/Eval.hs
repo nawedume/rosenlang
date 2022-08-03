@@ -68,6 +68,12 @@ eval (ExpectQuery distExpr) = do
         valToReal (RealVal d) = d
         valToReal val = 0.0
 
+eval (DistCreate name distExpr argsExpr) = do
+    dist <- eval distExpr
+    args <- eval argsExpr
+    case Prelude.lookup name nameToPreSetDistMap of
+        Just evalFunc   -> evalFunc dist args
+        Nothing         -> throwError $ InvalidExpression "No distribution of given name is defined." 
 
 eval _ = do
     throwError $ InvalidExpression "Expression not defined"
@@ -84,3 +90,14 @@ mapExpr f (x:xs) = do
     v <- f x
     rest <- mapExpr f xs
     return $ v:rest
+
+nameToPreSetDistMap :: [(PreSetDist, Val -> Val -> Program Val)]
+nameToPreSetDistMap = [(Geometric, evalGeometricDist)]
+
+evalGeometricDist :: Val -> Val -> Program Val
+evalGeometricDist (DistVal distribution) (TupleVal args) =
+    case args of 
+        [successArg] -> return $ DistVal $ TupleVal <$> (Dist.until distribution (\a -> a == successArg))
+        _   -> throwError $ InvalidExpression "Expected 1 argument, $success_condition"
+        
+

@@ -34,12 +34,8 @@ tests = [testGroup "=G= parse" [
     testProperty "=P= MeasureParse invalid mapping" parseMeasureTest3,
     testProperty "=P= MeasureParse no closeing bracket" parseMeasureTest4,
 
-    testProperty "=P= DistInitParse double map" parseDistInitTest1,
-    testProperty "=P= DistInitParse single map" parseDistInitTest2,
-    testProperty "=P= DistInitParse no map" parseDistInitTest3,
-
-    testProperty "=P= DistJoinParse simple" parseDistJoinTest1,
-    testProperty "=P= DistJoinParse inner distributions" parseDistJoinTest2,
+    testProperty "=P= JoinOpParse simple" parseJoinOpTest1,
+    testProperty "=P= JoinOpParse inner distributions" parseJoinOpTest2,
 
     testProperty "=P= ReferenceParse recursiveReference" parseReferenceTest1,
     testProperty "=P= ReferenceParse simple number assignment" parseReferenceTest2,
@@ -80,18 +76,14 @@ parseMeasureTest2 = run exprParse "(A -> 0.4, B -> 0.6);" == [(Measure [(Symbol 
 parseMeasureTest3 = run exprParse "(A -> );" == []
 parseMeasureTest4 = run exprParse "(A -> 1.0;" == []
 
-parseDistInitTest1 = run exprParse "DIST (A->0.5,B->0.5);" == [(DistInit (Measure [(Symbol "A", Real 0.5), (Symbol "B", Real 0.5)]) ,"")]
-parseDistInitTest2 = run exprParse "DIST (A->1.0);" == [(DistInit (Measure [(Symbol "A", Real 1.0)]) ,"")]
-parseDistInitTest3 = run exprParse "DIST ();" == []
-
-parseDistJoinTest1 = run exprParse "DIST (A, B, C);" == [(DistJoin [Symbol "A", Symbol "B", Symbol "C"], "")]
-parseDistJoinTest2 = run exprParse "DIST (A, DIST (A -> 1.0), DIST (A, B));" == [(DistJoin 
+parseJoinOpTest1 = run exprParse "* (A, B, C);" == [(JoinOp [Symbol "A", Symbol "B", Symbol "C"], "")]
+parseJoinOpTest2 = run exprParse "* (A, (A -> 1.0), * (A, B));" == [(JoinOp 
         [Symbol "A",
-         DistInit (Measure [(Symbol "A", Real 1.0)]),
-         DistJoin [Symbol "A", Symbol "B"]
+        Measure [(Symbol "A", Real 1.0)],
+         JoinOp [Symbol "A", Symbol "B"]
         ], "")]
 
-parseReferenceTest1 = run exprParse "A = DIST (A);" == [(Reference (Symbol "A") (DistJoin [Symbol "A"]), "")]
+parseReferenceTest1 = run exprParse "A = * (A);" == [(Reference (Symbol "A") (JoinOp [Symbol "A"]), "")]
 parseReferenceTest2 = run exprParse "A =1.0;" == [(Reference (Symbol "A") (Real 1.0), "")]
 
 parseStrTest1 = run exprParse "'abc;" == [(Str "abc", "")]

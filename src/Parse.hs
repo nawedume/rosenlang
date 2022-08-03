@@ -151,6 +151,7 @@ exprSetParse = foldr1 (\x y -> x <|> y) grammerGens where
             booleanParse,
             measureParse,
             distOpParse,
+            distCreateParse,
             tupleParse,
             expectationParse,
             refParse,
@@ -238,7 +239,7 @@ distOpParse = do
 
 distOps = [("*", JoinOp), 
            ("+", CatOp)]
-distOperatorParser = foldr1 (<|>) (map (operS . fst) distOps) 
+distOperatorParser = keywordParser distOps
 
 relOpParse :: Parser Expr
 relOpParse = do
@@ -254,3 +255,18 @@ expectationParse = do
     operS "EXPECT"
     distExpr <- exprSetParse 
     return $ ExpectQuery distExpr
+
+distCreateParse :: Parser Expr
+distCreateParse = do
+    operS "CREATE"
+    name <- keywordParser presetDistMap
+    operS "FROM"
+    distExpr <- exprSetParse
+    operS "WITH"
+    paramsTuple <- tupleParse
+    case lookup name presetDistMap of
+        Just name' -> return $ DistCreate name' distExpr paramsTuple
+        Nothing -> error "Distribution not defined for parsing."
+
+keywordParser :: [(String, a)] -> Parser String
+keywordParser mapping = foldr1 (<|>) (map (operS . fst) mapping)

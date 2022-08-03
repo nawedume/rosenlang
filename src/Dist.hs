@@ -92,3 +92,11 @@ expectation (Distribution dist) = sum $ map (\(a, p) -> ((a * p) :: Double)) dis
 normalizeDistribution dist = 
         let total = sum (map snd dist)
         in map (\(a, p) -> (a, p / total)) dist
+
+count :: Int -> Distribution a -> (a -> Bool) -> Distribution Int
+count n distribution pred = clean countDist where
+    countDist = do
+        events <- join $ take n $ repeat distribution
+        let count = length $ filter pred events
+        return $ count
+
