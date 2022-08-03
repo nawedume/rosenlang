@@ -72,6 +72,7 @@ relationOpMap = [
     (">", (>)),
     ("!=", (/=))]
 
-data PreSetDist = Geometric deriving (Show, Eq)
+data PreSetDist = Geometric | Binomial deriving (Show, Eq)
 presetDistMap = [
-    ("GEOMETRIC", Geometric)]
+    ("GEOMETRIC", Geometric),
+    ("BINOMIAL", Binomial)]

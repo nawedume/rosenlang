@@ -92,12 +92,17 @@ mapExpr f (x:xs) = do
     return $ v:rest
 
 nameToPreSetDistMap :: [(PreSetDist, Val -> Val -> Program Val)]
-nameToPreSetDistMap = [(Geometric, evalGeometricDist)]
+nameToPreSetDistMap = [(Geometric, evalGeometricDist), (Binomial, evalBinomailDist)]
 
 evalGeometricDist :: Val -> Val -> Program Val
 evalGeometricDist (DistVal distribution) (TupleVal args) =
     case args of 
-        [successArg] -> return $ DistVal $ TupleVal <$> (Dist.until distribution (\a -> a == successArg))
+        [successArg] -> return $ DistVal $ TupleVal <$> (Dist.until distribution (== successArg))
         _   -> throwError $ InvalidExpression "Expected 1 argument, $success_condition"
         
 
+evalBinomailDist :: Val -> Val -> Program Val
+evalBinomailDist (DistVal distribution) (TupleVal args) =
+    case args of
+        [successArg, (IntVal n)] -> return $ DistVal $ (IntVal . fromIntegral) <$> (Dist.count (fromIntegral n) distribution (== successArg))
+        _   -> throwError $ InvalidExpression "Expected 2 arguments, $success_condition, $number_of_trials"
