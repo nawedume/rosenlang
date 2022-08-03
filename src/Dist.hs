@@ -100,3 +100,16 @@ count n distribution pred = clean countDist where
         let count = length $ filter pred events
         return $ count
 
+sample :: Int -> Int -> Distribution a -> [a]
+sample seed n (Distribution dist) =
+    let sampleVals = take n $ randomList seed
+        cnfDist = getCnf dist 0
+    in  map (\sp -> lookup sp cnfDist) sampleVals
+    where
+        getCnf [] _ = []
+        getCnf ((a, p):xs) prevTotal = let newP = p + prevTotal in (a, newP):(getCnf xs newP)
+        
+        lookup sp cnfDist = fst $ head $ filter (\(a, p) -> sp < p) cnfDist
+
+        randomList :: Int -> [Double]
+        randomList seed = randoms (mkStdGen seed) 

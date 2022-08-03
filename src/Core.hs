@@ -16,7 +16,7 @@ data Expr = Symbol String
     | JoinOp [Expr] -- Cartesian product of the distributions in the list
     | CatOp [Expr] -- Combination of distributions in the list
     | ExpectQuery Expr -- Expectation for a distribution
-    | DistCreate PreSetDist Expr Expr -- To create distributions; the name, the existing distribution and the parameters as a tuple
+    | DistCreate PreSetCreate Expr Expr -- To create distributions; the name, the existing distribution and the parameters as a tuple
     | Reference Expr Expr -- Symbol to any Expr
     | RelOpExp String Expr Expr -- The operation, and the two expressions
     deriving (Show, Eq)
@@ -72,7 +72,8 @@ relationOpMap = [
     (">", (>)),
     ("!=", (/=))]
 
-data PreSetDist = Geometric | Binomial deriving (Show, Eq)
+data PreSetCreate = Geometric | Binomial | Sample deriving (Show, Eq)
 presetDistMap = [
     ("GEOMETRIC", Geometric),
-    ("BINOMIAL", Binomial)]
+    ("BINOMIAL", Binomial),
+    ("SAMPLE", Sample)]

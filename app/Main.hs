@@ -6,6 +6,7 @@ import Parse
 import Eval
 
 import Data.HashMap.Strict as H
+import System.Random
 
 
 main :: IO ()
@@ -37,7 +38,11 @@ step env = do
 
 repl :: Env -> IO ()
 repl env = do
-    menv <- step env
+    seed <- newRand
+    let env2 = H.insert "__seed" (IntVal $ fromIntegral seed) env -- internal value
+    menv <- step env2
     case menv of
         Nothing -> pure () -- quit
         Just env' -> repl env'
+
+newRand = randomIO :: IO Int

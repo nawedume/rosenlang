@@ -91,8 +91,11 @@ mapExpr f (x:xs) = do
     rest <- mapExpr f xs
     return $ v:rest
 
-nameToPreSetDistMap :: [(PreSetDist, Val -> Val -> Program Val)]
-nameToPreSetDistMap = [(Geometric, evalGeometricDist), (Binomial, evalBinomailDist)]
+nameToPreSetDistMap :: [(PreSetCreate, Val -> Val -> Program Val)]
+nameToPreSetDistMap = [
+    (Geometric, evalGeometricDist), 
+    (Binomial, evalBinomailDist),
+    (Sample, evalSample)]
 
 evalGeometricDist :: Val -> Val -> Program Val
 evalGeometricDist (DistVal distribution) (TupleVal args) =
@@ -106,3 +109,13 @@ evalBinomailDist (DistVal distribution) (TupleVal args) =
     case args of
         [successArg, (IntVal n)] -> return $ DistVal $ (IntVal . fromIntegral) <$> (Dist.count (fromIntegral n) distribution (== successArg))
         _   -> throwError $ InvalidExpression "Expected 2 arguments, $success_condition, $number_of_trials"
+
+evalSample :: Val -> Val -> Program Val
+evalSample (DistVal distribution) (TupleVal args) =
+    case args of
+        [IntVal n] -> do
+            env <- get
+            case H.lookup "__seed" env of
+                Just (IntVal seed) -> return $ TupleVal $ Dist.sample (fromIntegral seed) (fromIntegral n) distribution
+                Nothing -> throwError $ UnknownError "Seed not defined."
+        [] -> throwError $ InvalidExpression "Expected 1 argument, $number_of_trials"
