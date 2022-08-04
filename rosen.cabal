@@ -29,7 +29,6 @@ library
       Dist
       Eval
       Example
-      Lib
       Parse
   other-modules:
       Paths_rosen
