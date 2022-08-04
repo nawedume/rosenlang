@@ -1,3 +1,5 @@
+{- | This module handles the main evaluation of the language. It will take expressions and calculate the proper values for them. -}
+
 module Eval where
 
 import Core
@@ -6,6 +8,7 @@ import Control.Monad.State (get, put)
 import Data.HashMap.Strict as H 
 import Dist
 
+{- Convert and expression into a value for the current Program context. -}
 eval :: Expr -> Program Val
 eval (Symbol s) = do
     env <- get
@@ -78,12 +81,19 @@ eval (DistCreate name distExpr argsExpr) = do
 eval _ = do
     throwError $ InvalidExpression "Expression not defined"
 
+{- A quick way to evaluate a distribution.
+There are many areas where a distribution is needed, this helps get that value.
+-}
 evalDist distExpr = do
     dv <- eval distExpr
     case dv of
         (DistVal dist)  -> return dist
         otherwise       -> throwError $ UnknownError "a non-distribution value was derived from a dist expr"
 
+{- Map an array to a program of an array of results
+This is mostly used for evaluating a list of expressions into a list of values,
+while remaining in a Program context.
+-}
 mapExpr :: (a -> Program b) -> [a] -> Program [b]
 mapExpr _ [] = return []
 mapExpr f (x:xs) = do
@@ -91,6 +101,9 @@ mapExpr f (x:xs) = do
     rest <- mapExpr f xs
     return $ v:rest
 
+{- This maps the predefined distribution functions to their evaluation functions. 
+Since all the functions use the same expression, a mapping like this is needed.
+-}
 nameToPreSetDistMap :: [(PreSetCreate, Val -> Val -> Program Val)]
 nameToPreSetDistMap = [
     (Geometric, evalGeometricDist), 
