@@ -1,3 +1,5 @@
+{- This is the main repl of the "Rosen" language -}
+
 module Main where
 
 import Lib
@@ -12,6 +14,8 @@ import System.Random
 main :: IO ()
 main = repl H.empty
 
+{- | Step through one iteration of the repl. Only handles single statement lines.
+-}
 step :: Env -> IO (Maybe Env)
 step env = do
     putStr ">>> "
@@ -36,6 +40,7 @@ step env = do
                             putStrLn (show val)
                             return env
 
+{- | The main repl loop. Resets the seed for sampling on each iteration. -}
 repl :: Env -> IO ()
 repl env = do
     seed <- newRand
