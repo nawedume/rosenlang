@@ -39,7 +39,7 @@ You can assign to variables:
 | "tails": 0.7
 ----
 ```
-Note; Rosen is not functional. You are able to reassign variables, and some operations don't act like pure functions (for example, sampling).
+Note; Rosen is not a functional programming language. You are able to reassign variables, and some operations don't act like pure functions (for example, sampling).
 
 To flip a coin 3 times:
 ```
