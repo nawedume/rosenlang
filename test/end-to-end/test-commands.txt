@@ -1,0 +1,16 @@
+1;
+1.0;
+FALSE;
+TRUE;
+10 < 3;
+10 >= 10;
+5 == 5;
+5 != 5;
+'Hello
+(1, 2.0, FALSE, (-1 -> 0.5, 1 -> 0.5));
+coin = (0 -> 0.3, 1 -> 0.7);
+EXPECT coin;
+CREATE GEOMETRIC FROM coin WITH (0);
+CREATE BINOMIAL FROM coin WITH (0, 5);
+coin = ('h -> 0.3, 't -> 0.7);
+* (coin, coin, coin);
